@@ -15,4 +15,16 @@ const globalForDb = globalThis as unknown as {
 const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
 if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
+export async function testConnection() {
+  try {
+    // Простой запрос для проверки подключения
+    const result = await conn`SELECT 1 as test`;
+    console.log('✅ Database connected successfully:', result);
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    return false;
+  }
+}
+
 export const db = drizzle(conn, { schema });

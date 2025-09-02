@@ -2,7 +2,8 @@
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import { sql } from "drizzle-orm";
-import { index, pgTable,serial,text,integer  } from "drizzle-orm/pg-core";
+import "server-only"
+import {index, pgTable, serial, text, integer, pgTableCreator} from "drizzle-orm/pg-core";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -10,11 +11,26 @@ import { index, pgTable,serial,text,integer  } from "drizzle-orm/pg-core";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-//export const createTable = pgTableCreator((name) => `cloud_storage_${name}`);
+export const createTable = pgTableCreator((name) => `cloud_storage_${name}`);
 
-export const users = pgTable("users_table", {
-    id: serial("id").primaryKey(), // автоинкрементный ключ
-    name: text("name"),
-    age: integer("age"),
-});
-export const files =
+
+export const files = createTable("files_table", {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    size: integer("size").notNull(),
+    url:text("url").notNull(),
+    parent:serial("parent").notNull()
+},(t)=>{
+    return[
+        index("files_parent_index").on(t.parent)
+    ];
+})
+export const folders = createTable("folders_table", {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    parent:serial("parent")
+},(t)=>{
+    return[
+        index("folders_parent_index").on(t.parent)
+    ];
+})

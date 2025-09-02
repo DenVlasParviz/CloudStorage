@@ -1,20 +1,19 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { mockFiles, mockFolders } from "../../mockdata/mockData";
-import { Folder, FileIcon, Upload, ChevronRight } from "lucide-react";
-import { FileRow, FolderRow } from "./file-row";
-export default function GoogleDriveClone() {
-    const [currentFolder, setCurrentFolder] = useState<string>("root");
+import React, {useMemo, useState} from "react";
+import {Folder, FileIcon, Upload, ChevronRight} from "lucide-react";
+import {FileRow, FolderRow} from "./file-row";
+import type{ files, folders} from "~/server/db/schema";
 
-    const getCurrentFiles = () => {
-        return mockFiles.filter((file) => file.parent === currentFolder);
-    };
-    const getCurrentFolders = () => {
-        return mockFolders.filter((folder) => folder.parent === currentFolder);
-    };
+export default function DriveContents (props: {
+    files: typeof files.$inferSelect[];
+    folders: typeof folders.$inferSelect[]
+}) {
+    const [currentFolder, setCurrentFolder] = useState<number>(1);
 
-    const handleFolderClick = (folderId: string) => {
+
+
+    const handleFolderClick = (folderId: number) => {
         setCurrentFolder(folderId);
     };
 
@@ -22,18 +21,18 @@ export default function GoogleDriveClone() {
         const breadcrumbs = [];
         let currentId = currentFolder;
 
-        while (currentId !== "root") {
-            const folder = mockFolders.find((file) => file.id === currentId);
+        while (currentId !== 1) {
+            const folder = props.folders.find((folder) => folder.id === currentId);
             if (folder) {
                 breadcrumbs.unshift(folder);
-                currentId = folder.parent ?? "root";
+                currentId = folder.parent ?? 1;
             } else {
                 break;
             }
         }
 
         return breadcrumbs;
-    }, [currentFolder]);
+    }, [currentFolder,props.folders]);
 
     const handleUpload = () => {
         alert("Upload functionality would be implemented here");
@@ -45,14 +44,14 @@ export default function GoogleDriveClone() {
                 <div className="mb-6 flex items-center justify-between">
                     <div className="flex items-center">
                         <button
-                            onClick={() => setCurrentFolder("root")}
+                            onClick={() => setCurrentFolder(1)}
                             className="mr-2 text-gray-300 hover:text-white"
                         >
                             My Drive
-                            </button>
+                        </button>
                         {breadcrumbs.map((folder, index) => (
                             <div key={folder.id} className="flex items-center">
-                                <ChevronRight className="mx-2 text-gray-500" size={16} />
+                                <ChevronRight className="mx-2 text-gray-500" size={16}/>
                                 <button
                                     onClick={() => handleFolderClick(folder.id)}
                                     className="text-gray-300 hover:text-white"
@@ -66,7 +65,7 @@ export default function GoogleDriveClone() {
                         onClick={handleUpload}
                         className="bg-blue-600 text-white hover:bg-blue-700"
                     >
-                        <Upload className="mr-2" size={20} />
+                        <Upload className="mr-2" size={20}/>
                         Upload
                     </button>
                 </div>
@@ -79,7 +78,7 @@ export default function GoogleDriveClone() {
                         </div>
                     </div>
                     <ul>
-                        {getCurrentFolders().map((folder) => (
+                        {props.folders.map((folder) => (
                             <FolderRow
                                 key={folder.id}
                                 folder={folder}
@@ -88,8 +87,8 @@ export default function GoogleDriveClone() {
                                 }}
                             />
                         ))}
-                        {getCurrentFiles().map((file) => (
-                            <FileRow key={file.id} file={file} />
+                        {props.files.map((file) => (
+                            <FileRow key={file.id} file={file}/>
                         ))}
                     </ul>
                 </div>

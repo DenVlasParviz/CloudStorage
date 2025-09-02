@@ -9,7 +9,7 @@ import Link from "next/link";
 export default function DriveContents(props: {
     files: typeof files_table.$inferSelect[];
     folders: typeof folders_table.$inferSelect[];
-    parents:typeof folders.$inferSelect[];
+    parents:typeof folders_table.$inferSelect[];
 }) {
 
 

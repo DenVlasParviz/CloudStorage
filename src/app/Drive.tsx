@@ -1,78 +1,99 @@
 "use client";
-import React, { useState } from "react";
-import { mockData } from "../../mockdata/mockData";
-import type { FileItem } from "../../mockdata/mockData";
 
-const Drive: React.FC = () => {
-    const [currentFolder, setCurrentFolder] = useState<FileItem | null>(null);
-    const [history, setHistory] = useState<FileItem[]>([]);
+import React, { useMemo, useState } from "react";
+import { mockFiles, mockFolders } from "../../mockdata/mockData";
+import { Folder, FileIcon, Upload, ChevronRight } from "lucide-react";
+import { FileRow, FolderRow } from "./file-row";
+export default function GoogleDriveClone() {
+    const [currentFolder, setCurrentFolder] = useState<string>("root");
 
-    // получаем список элементов для отображения
-    const items = currentFolder ? currentFolder.children || [] : mockData;
-
-    const openFolder = (folder: FileItem) => {
-        setHistory((prev) => [...prev, folder]); // добавляем в историю
-        setCurrentFolder(folder);
+    const getCurrentFiles = () => {
+        return mockFiles.filter((file) => file.parent === currentFolder);
+    };
+    const getCurrentFolders = () => {
+        return mockFolders.filter((folder) => folder.parent === currentFolder);
     };
 
-    const goBack = () => {
-        const newHistory = [...history];
-        newHistory.pop(); // убираем последний шаг
-        setHistory(newHistory);
-        setCurrentFolder(newHistory[newHistory.length - 1] || null);
+    const handleFolderClick = (folderId: string) => {
+        setCurrentFolder(folderId);
+    };
+
+    const breadcrumbs = useMemo(() => {
+        const breadcrumbs = [];
+        let currentId = currentFolder;
+
+        while (currentId !== "root") {
+            const folder = mockFolders.find((file) => file.id === currentId);
+            if (folder) {
+                breadcrumbs.unshift(folder);
+                currentId = folder.parent ?? "root";
+            } else {
+                break;
+            }
+        }
+
+        return breadcrumbs;
+    }, [currentFolder]);
+
+    const handleUpload = () => {
+        alert("Upload functionality would be implemented here");
     };
 
     return (
-        <div style={{ maxWidth: "600px", margin: "20px auto", fontFamily: "sans-serif" }}>
-            <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>My Drive</h1>
-
-            {currentFolder && (
-                <button
-                    onClick={goBack}
-                    style={{
-                        marginBottom: "15px",
-                        padding: "5px 10px",
-                        border: "1px solid #ccc",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                    }}
-                >
-                    ⬅ Back
-                </button>
-            )}
-
-            <ul style={{ listStyle: "none", padding: 0 }}>
-                {items.map((item) => (
-                    <li
-                        key={item.id}
-                        style={{
-                            margin: "8px 0",
-                            padding: "8px 12px",
-                            border: "1px solid #eee",
-                            borderRadius: "8px",
-                            cursor: item.type === "folder" ? "pointer" : "default",
-                            background: "#fafafa",
-                            transition: "background 0.2s",
-                        }}
-                        onClick={() => item.type === "folder" && openFolder(item)}
+        <div className="min-h-screen bg-gray-900 p-8 text-gray-100">
+            <div className="mx-auto max-w-6xl">
+                <div className="mb-6 flex items-center justify-between">
+                    <div className="flex items-center">
+                        <button
+                            onClick={() => setCurrentFolder("root")}
+                            className="mr-2 text-gray-300 hover:text-white"
+                        >
+                            My Drive
+                            </button>
+                        {breadcrumbs.map((folder, index) => (
+                            <div key={folder.id} className="flex items-center">
+                                <ChevronRight className="mx-2 text-gray-500" size={16} />
+                                <button
+                                    onClick={() => handleFolderClick(folder.id)}
+                                    className="text-gray-300 hover:text-white"
+                                >
+                                    {folder.name}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <button
+                        onClick={handleUpload}
+                        className="bg-blue-600 text-white hover:bg-blue-700"
                     >
-                        {item.type === "folder" ? (
-                            <span>📁 {item.name}</span>
-                        ) : (
-                            <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ textDecoration: "none", color: "#333" }}
-                            >
-                                📄 {item.name}
-                            </a>
-                        )}
-                    </li>
-                ))}
-            </ul>
+                        <Upload className="mr-2" size={20} />
+                        Upload
+                    </button>
+                </div>
+                <div className="rounded-lg bg-gray-800 shadow-xl">
+                    <div className="border-b border-gray-700 px-6 py-4">
+                        <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-400">
+                            <div className="col-span-6">Name</div>
+                            <div className="col-span-3">Type</div>
+                            <div className="col-span-3">Size</div>
+                        </div>
+                    </div>
+                    <ul>
+                        {getCurrentFolders().map((folder) => (
+                            <FolderRow
+                                key={folder.id}
+                                folder={folder}
+                                handleFolderClick={() => {
+                                    handleFolderClick(folder.id);
+                                }}
+                            />
+                        ))}
+                        {getCurrentFiles().map((file) => (
+                            <FileRow key={file.id} file={file} />
+                        ))}
+                    </ul>
+                </div>
+            </div>
         </div>
     );
-};
-
-export default Drive;
+}

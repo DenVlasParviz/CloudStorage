@@ -2,8 +2,7 @@
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import { sql } from "drizzle-orm";
-import { index, pgTableCreator } from "drizzle-orm/pg-core";
-import {int ,text,singlestoreTable} from "drizzle-orm/singlestore-core";
+import { index, pgTable,serial,text,integer  } from "drizzle-orm/pg-core";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -13,9 +12,9 @@ import {int ,text,singlestoreTable} from "drizzle-orm/singlestore-core";
  */
 //export const createTable = pgTableCreator((name) => `cloud_storage_${name}`);
 
-export const users = singlestoreTable("users_table",{
-    id:int("id").primaryKey().autoincrement(),
+export const users = pgTable("users_table", {
+    id: serial("id").primaryKey(), // автоинкрементный ключ
     name: text("name"),
-    age:int("age"),
+    age: integer("age"),
 });
-
+export const files =

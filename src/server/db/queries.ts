@@ -1,9 +1,12 @@
+
+import "server-only";
 import {files_table as filesSchema, folders_table as foldersSchema} from "~/server/db/schema"
 import {db} from "~/server/db";
 import {eq} from "drizzle-orm";
 
+export const QUERIES={
 
-export async function getAllParentsForFolder(folderId:number){
+    getAllParentsForFolder: async function (folderId:number){
     const parents = [];
     let currentId:number | null =folderId;
     while(currentId!==null){
@@ -18,18 +21,22 @@ export async function getAllParentsForFolder(folderId:number){
     }
     console.log("All parents:", parents);
     return parents
+},
+
+
+
+
+    getFolders: function (folderId:number){
+    return db.select().from(foldersSchema).where(eq(foldersSchema.parent,folderId))
+},
+
+    getFiles: function (folderId:number){
+    return db.select().from(filesSchema).where(eq(filesSchema.parent,folderId));
 }
 
 
 
-
-  export  function getFolders(folderId:number){
-     return db.select().from(foldersSchema).where(eq(foldersSchema.parent,folderId))
-  }
-
-  export  function getFiles(folderId:number){
-      return db.select().from(filesSchema).where(eq(filesSchema.parent,folderId));
-  }
+}
 
 
 

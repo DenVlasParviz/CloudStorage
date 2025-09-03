@@ -18,7 +18,7 @@ export const files_table = createTable("files_table", {
     name: text("name").notNull(),
     size: integer("size").notNull(),
     url:text("url").notNull(),
-    parent:serial("parent").notNull()
+    parent:integer("parent").notNull()
 },(t)=>{
     return[
         index("files_parent_index").on(t.parent)
